@@ -1,0 +1,67 @@
+<h2 style="text-align: center;">Description</h2>
+
+<p>Congratulations, you're at the finish line! After all, our task is to create an AI that will become a strong opponent.</p>
+
+<p>Let's write the <code class="java">"hard"</code> level difficulty.</p>
+
+<p>Compared to the "medium" level difficulty, this level not just go one move ahead to see an immediate win or prevent an immediate loss. This level can see two moves ahead, three moves ahead and so on. Basically, it can see all possible outcomes till the end of the game and choose the best of them considering his opponent also would play perfectly. So, it doesn't rely on the blunders of the opponent, it plays perfectly regardless of the opponent's skill.</p>
+
+<p>The algorithm that implements this is called Minimax. This is the brute force algorithm that maximizes the value of the own position and minimizes the value of the opponent's position. It's not only an algorithm for Tic-Tac-Toe, but for every game with two players with alternate move order, for example, chess.</p>
+
+<h2 style="text-align: center;">Objectives</h2>
+
+<p>In the last stage you need to implement Minimax algorithm as the "hard" difficulty level. <a target="_blank" href="https://medium.freecodecamp.org/how-to-make-your-tic-tac-toe-game-unbeatable-by-using-the-minimax-algorithm-9d690bad4b37" rel="nofollow noopener noreferrer">This</a> link will help to understand details.</p>
+
+<p>You also should add <code class="java">"hard"</code> parameter to be able to play against this level.</p>
+
+<h2 style="text-align: center;">Example</h2>
+
+<p>The example below shows how your program should work.<br>
+The greater-than symbol followed by space (<code class="java">&gt; </code>) represents the user input. Notice that it's not the part of the input.</p>
+
+<pre><code class="language-no-highlight">Input command: &gt; start hard user
+Making move level "hard"
+---------
+|       |
+| X     |
+|       |
+---------
+Enter the coordinates: &gt; 2 2
+---------
+|       |
+| X O   |
+|       |
+---------
+Making move level "hard"
+---------
+|   X   |
+| X O   |
+|       |
+---------
+Enter the coordinates: &gt; 2 1
+---------
+|   X   |
+| X O   |
+|   O   |
+---------
+Making move level "hard"
+---------
+| X X   |
+| X O   |
+|   O   |
+---------
+Enter the coordinates: &gt; 1 1
+---------
+| X X   |
+| X O   |
+| O O   |
+---------
+Making move level "hard"
+---------
+| X X X |
+| X O   |
+| O O   |
+---------
+X wins
+
+Input command: &gt; exit</code></pre>

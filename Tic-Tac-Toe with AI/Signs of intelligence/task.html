@@ -1,0 +1,150 @@
+<h2 style="text-align: center;">Description</h2>
+
+<p>Let's write a <code class="java">"medium"</code> level difficulty. It's time to add awareness to our AI. Compared to randomly picking a cell to take a move, this level is considerably smarter.</p>
+
+<p>Despite the randomness in the first moves, its level is a lot harder to beat. This level stops all simple attempts to beat it due to the second rule, and always wins when it can due to the first rule.</p>
+
+<p>Let's take a look at these rules.</p>
+
+<h2 style="text-align: center;">Objectives</h2>
+
+<p>The <code class="java">"medium"</code> level difficulty makes a move using the following process:</p>
+
+<ol>
+	<li>If it can win in one move (if it has two in a row), it places a third to get three in a row and win.</li>
+	<li>If the opponent can win in one move, it plays the third itself to block the opponent to win.</li>
+	<li>Otherwise, it makes a random move.</li>
+</ol>
+
+<p>You also should add <code class="java">"medium"</code> parameter to be able to play against this level. And, of course, it should be possible to make "easy" vs "medium" matchup!</p>
+
+<h2 style="text-align: center;">Example</h2>
+
+<p>The example below shows how your program should work.<br>
+The greater-than symbol followed by space (<code class="java">&gt; </code>) represents the user input. Notice that it's not the part of the input.</p>
+
+<pre><code class="language-no-highlight">Input command: &gt; start user medium
+---------
+|       |
+|       |
+|       |
+---------
+Enter the coordinates: &gt; 2 2
+---------
+|       |
+|   X   |
+|       |
+---------
+Making move level "medium"
+---------
+|       |
+|   X   |
+| O     |
+---------
+Enter the coordinates: &gt; 1 3
+---------
+| X     |
+|   X   |
+| O     |
+---------
+Making move level "medium"
+---------
+| X     |
+|   X   |
+| O   O |
+---------
+Enter the coordinates: &gt; 2 1
+---------
+| X     |
+|   X   |
+| O X O |
+---------
+Making move level "medium"
+---------
+| X O   |
+|   X   |
+| O X O |
+---------
+Enter the coordinates: &gt; 1 2
+---------
+| X O   |
+| X X   |
+| O X O |
+---------
+Making move level "medium"
+---------
+| X O   |
+| X X O |
+| O X O |
+---------
+Enter the coordinates: &gt; 3 3
+---------
+| X O X |
+| X X O |
+| O X O |
+---------
+Draw
+
+Input command: &gt; start medium user
+---------
+|       |
+|       |
+|       |
+---------
+Making move level "medium"
+---------
+|       |
+|       |
+|   X   |
+---------
+Enter the coordinates: &gt; 2 2
+---------
+|       |
+|   O   |
+|   X   |
+---------
+Making move level "medium"
+---------
+|       |
+|   O   |
+| X X   |
+---------
+Enter the coordinates: &gt; 3 1
+---------
+|       |
+|   O   |
+| X X O |
+---------
+Making move level "medium"
+---------
+| X     |
+|   O   |
+| X X O |
+---------
+Enter the coordinates: &gt; 1 2
+---------
+| X     |
+| O O   |
+| X X O |
+---------
+Making move level "medium"
+---------
+| X     |
+| O O X |
+| X X O |
+---------
+Enter the coordinates: &gt; 3 3
+---------
+| X   O |
+| O O X |
+| X X O |
+---------
+Making move level "medium"
+---------
+| X X O |
+| O O X |
+| X X O |
+---------
+Draw
+
+Input command: &gt; exit</code></pre>

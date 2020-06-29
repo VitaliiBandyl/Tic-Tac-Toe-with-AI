@@ -1,0 +1,70 @@
+<h2 style="text-align: center;">Description</h2>
+
+<p>Now it is time to make a working game. Let's create our first opponent! In this version of the program, the user will be playing as X, and the <code class="java">"easy"</code> level computer will be playing as O. This will be our first small step to the AI!</p>
+
+<p>Let's make it so that at this level the computer will make random moves. This level will be perfect for those who play this game for the first time! Well, though... You can create a level of difficulty that will always give in and never win the game. You can implement such a level along with "easy" level, if you want, but it will not be tested.</p>
+
+<h2 style="text-align: center;">Objectives</h2>
+
+<p>In this stage you should implement the following:</p>
+
+<ol>
+	<li>When starting the program, an empty field should be displayed.</li>
+	<li>The first to start the game should be the user as <code class="java">X</code>. The program should ask the user to enter the cell coordinates.</li>
+	<li>Next the computer should make its move as <code class="java">O</code>. And so on until someone will win or there will be a draw.</li>
+	<li>At the very end of the game you need to print the final result of the game.</li>
+</ol>
+
+<h2 style="text-align: center;">Example</h2>
+
+<p>The example below shows how your program should work.<br>
+The greater-than symbol followed by space (<code class="java">&gt; </code>) represents the user input. Notice that it's not the part of the input.</p>
+
+<pre><code class="language-no-highlight">---------
+|       |
+|       |
+|       |
+---------
+Enter the coordinates: &gt; 2 2
+---------
+|       |
+|   X   |
+|       |
+---------
+Making move level "easy"
+---------
+| O     |
+|   X   |
+|       |
+---------
+Enter the coordinates: &gt; 3 1
+---------
+| O     |
+|   X   |
+|     X |
+---------
+Making move level "easy"
+---------
+| O     |
+| O X   |
+|     X |
+---------
+Enter the coordinates: &gt; 1 1
+---------
+| O     |
+| O X   |
+| X   X |
+---------
+Making move level "easy"
+---------
+| O     |
+| O X O |
+| X   X |
+---------
+Enter the coordinates: &gt; 2 1
+---------
+| O     |
+| O X O |
+| X X X |
+---------
+X wins</code></pre>
