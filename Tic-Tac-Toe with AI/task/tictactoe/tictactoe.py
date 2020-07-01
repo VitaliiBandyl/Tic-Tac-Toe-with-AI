@@ -1,8 +1,9 @@
 import random
+from abc import ABC, abstractmethod
 from typing import List, Sequence
 
 
-class TicTacToe:
+class TicTacToeField:
     def __init__(self, string_desk: str = '_________'):
         self.string_field = string_desk
         self.nested_list_field = self._convert_field_to_nested_list()
@@ -86,7 +87,7 @@ class TicTacToe:
                     count += 1
         return count
 
-    def make_move(self):
+    def move(self):
         """Make move"""
         if self.O < self.X:
             self.nested_list_field[self._x][self._y] = 'O'
@@ -122,14 +123,24 @@ class TicTacToe:
         return False
 
 
-class AI:
+class AbstractPlayer(ABC):
+    """Abstract player class for inheritance by other players"""
+    def __init__(self, game_field):
+        self.game_field = game_field
+
+    @abstractmethod
+    def make_move(self):
+        pass
+
+
+class AI(AbstractPlayer):
     def __init__(self, game_field, difficult):
-        self.field = game_field
+        super(AI, self).__init__(game_field)
         self.difficult = difficult
 
-    def AI_move(self):
+    def make_move(self):
         """AI makes move"""
-        if not self.field.count_element(' '):
+        if not self.game_field.count_element(' '):
             return
         elif self.difficult == 'easy':
             self.easy_move()
@@ -144,33 +155,84 @@ class AI:
         """Make easy move"""
         while True:
             coordinates = (random.randint(1, 3), random.randint(1, 3))
-            validation_result = self.field.validate_coordinates(coordinates)
+            validation_result = self.game_field.validate_coordinates(coordinates)
             if validation_result == 'Valid':
                 print('Making move level "easy"')
-                self.field.make_move()
+                self.game_field.move()
                 return
 
 
-if __name__ == '__main__':
-    game_field = TicTacToe()
-    game_field.show_game_field()
-    enemy = AI(game_field, 'easy')
+class User(AbstractPlayer):
+    """Real player"""
+    def make_move(self):
+        """User makes move"""
+        while True:
+            coordinates = input('Enter the coordinates: ').split()
+            validation_result = self.game_field.validate_coordinates(coordinates)
+            if validation_result == 'Not a Number':
+                print('You should enter numbers!')
+                continue
+            elif validation_result == 'Incorrect coordinates':
+                print('Coordinates should be from 1 to 3!')
+                continue
+            elif validation_result == 'Cell is occupied':
+                print('This cell is occupied! Choose another one!')
+                continue
+            else:
+                return self.game_field.move()
+
+
+class GameFactory:
+    """Creates setup game"""
+    def __init__(self, player_1, player_2, game_field):
+        self.player_1 = User(game_field) if player_1 == 'user' else AI(game_field, player_1)
+        self.player_2 = User(game_field) if player_2 == 'user' else AI(game_field, player_2)
+
+
+class ParametersError(Exception):
+    pass
+
+
+def parse_command():
+    """Parse user commands for setup game"""
+    game_configuration = ('user', 'easy')
     while True:
-        coordinates = input('Enter the coordinates: ').split()
-        validation_result = game_field.validate_coordinates(coordinates)
-        if validation_result == 'Not a Number':
-            print('You should enter numbers!')
-            continue
-        elif validation_result == 'Incorrect coordinates':
-            print('Coordinates should be from 1 to 3!')
-            continue
-        elif validation_result == 'Cell is occupied':
-            print('This cell is occupied! Choose another one!')
-            continue
-        else:
-            game_field.make_move()
+        command = input('Input command: ').split(' ')
+        try:
+            if len(command) == 1 and command[0] == 'exit':
+                return 'break'
+            elif command[0] == 'start':
+                if command[1] in game_configuration and command[2] in game_configuration:
+                    player_1 = command[1]
+                    player_2 = command[2]
+                    return player_1, player_2
+            else:
+                raise ParametersError
+        except (IndexError, ParametersError):
+            print('Bad parameters!')
+
+
+if __name__ == '__main__':
+    while True:
+        command = parse_command()
+        if command == 'break':
+            break
+
+        player_1 = command[0]
+        player_2 = command[1]
+
+        game_field = TicTacToeField()
+        game = GameFactory(player_1, player_2, game_field)
+        game_field.show_game_field()
+        while True:
+            game.player_1.make_move()
             game_field.show_game_field()
-            enemy.AI_move()
+            winner = game_field.check_winner()
+            if winner:
+                print(winner)
+                break
+
+            game.player_2.make_move()
             game_field.show_game_field()
             winner = game_field.check_winner()
             if winner:

@@ -182,20 +182,31 @@ class TicTacToeTest(StageTest):
             for _ in range(9):
                 full_game_input += full_move_input
 
-            tests += [
-                TestCase(
-                    stdin=full_game_input,
-                    attach=(x, y)
-                )
-            ]
+            if i % 2 == 0:
+                initial = "start user easy\n"
+            else:
+                initial = "start easy user\n"
+
+            full_game_input = initial + full_game_input + "exit"
+
+            tests += [TestCase(stdin=full_game_input)]
 
             i += 1
+
+        tests += [TestCase(stdin="start easy easy\nexit")]
+
+        tests += [TestCase(stdin=
+                           "start user user\n" +
+                           "1 1\n" +
+                           "2 2\n" +
+                           "1 2\n" +
+                           "2 1\n" +
+                           "1 3\n" +
+                           "exit")]
 
         return tests
 
     def check(self, reply: str, attach: str) -> CheckResult:
-
-        clue_x, clue_y = attach
 
         fields = TicTacToeField.parse_all(reply)
 
@@ -217,11 +228,6 @@ class TicTacToeTest(StageTest):
                     "other one is not a continuation " +
                     "of the other (they differ more than in two places)."
                 )
-
-        if "Making move level \"easy\"" not in reply:
-            return CheckResult.wrong(
-                "No \"Making move level \"easy\"\" line in output"
-            )
 
         return CheckResult.correct()
 
