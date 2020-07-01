@@ -182,10 +182,14 @@ class TicTacToeTest(StageTest):
             for _ in range(9):
                 full_game_input += full_move_input
 
-            if i % 2 == 0:
+            if i % 4 == 0:
                 initial = "start user easy\n"
-            else:
+            elif i % 4 == 1:
                 initial = "start easy user\n"
+            elif i % 4 == 2:
+                initial = "start user medium\n"
+            else:
+                initial = "start medium user\n"
 
             full_game_input = initial + full_game_input + "exit"
 
@@ -193,16 +197,20 @@ class TicTacToeTest(StageTest):
 
             i += 1
 
-        tests += [TestCase(stdin="start easy easy\nexit")]
-
-        tests += [TestCase(stdin=
-                           "start user user\n" +
-                           "1 1\n" +
-                           "2 2\n" +
-                           "1 2\n" +
-                           "2 1\n" +
-                           "1 3\n" +
-                           "exit")]
+        tests += [
+            TestCase(stdin="start easy easy\nexit"),
+            TestCase(stdin="start medium medium\nexit"),
+            TestCase(stdin="start medium easy\nexit"),
+            TestCase(stdin="start easy medium\nexit"),
+            TestCase(stdin=
+                     "start user user\n" +
+                     "1 1\n" +
+                     "2 2\n" +
+                     "1 2\n" +
+                     "2 1\n" +
+                     "1 3\n" +
+                     "exit"),
+        ]
 
         return tests
 

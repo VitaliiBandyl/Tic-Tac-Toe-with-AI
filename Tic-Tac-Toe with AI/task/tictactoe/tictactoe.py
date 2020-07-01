@@ -79,7 +79,7 @@ class TicTacToeField:
             self._x, self._y = 2, 2
 
     def count_element(self, element: str) -> int:
-        """Counts 'X' or 'O' or ' ' elements on desk"""
+        """Counts 'X' or 'O' or ' ' elements on desk to check whose turn"""
         count = 0
         for row in self.nested_list_field:
             for el in row:
@@ -122,11 +122,22 @@ class TicTacToeField:
             return True
         return False
 
+    @property
+    def cursor_coordinates(self):
+        return self._x, self._y
+
+    @cursor_coordinates.setter
+    def cursor_coordinates(self, coordinates: List[int]):
+        self._x = coordinates[0]
+        self._y = coordinates[1]
+
 
 class AbstractPlayer(ABC):
     """Abstract player class for inheritance by other players"""
-    def __init__(self, game_field):
+    def __init__(self, game_field, mark):
         self.game_field = game_field
+        self.mark = mark
+        self.opponent_mark = 'X' if self.mark == 'O' else 'O'
 
     @abstractmethod
     def make_move(self):
@@ -134,32 +145,77 @@ class AbstractPlayer(ABC):
 
 
 class AI(AbstractPlayer):
-    def __init__(self, game_field, difficult):
-        super(AI, self).__init__(game_field)
+    def __init__(self, game_field, mark, difficult):
+        super(AI, self).__init__(game_field, mark)
         self.difficult = difficult
+        self.coordinates = None
 
     def make_move(self):
         """AI makes move"""
         if not self.game_field.count_element(' '):
             return
+
         elif self.difficult == 'easy':
-            self.easy_move()
+            self._easy_move()
 
         elif self.difficult == 'medium':
-            pass
+            self._medium_move()
 
         elif self.difficult == 'hard':
             pass
 
-    def easy_move(self):
-        """Make easy move"""
+    def _easy_move(self):
+        """Make easy move. Random move"""
         while True:
-            coordinates = (random.randint(1, 3), random.randint(1, 3))
-            validation_result = self.game_field.validate_coordinates(coordinates)
+            self.coordinates = (random.randint(1, 3), random.randint(1, 3))
+            validation_result = self.game_field.validate_coordinates(self.coordinates)
             if validation_result == 'Valid':
-                print('Making move level "easy"')
+                print(f'Making move level "{self.difficult}"')
                 self.game_field.move()
                 return
+
+    def _medium_move(self):
+        """Make medium move"""
+        for mark in (self.mark, self.opponent_mark):
+            if self._get_priority_cell(mark):
+                self.game_field.cursor_coordinates = self.coordinates
+                print(f'Making move level "{self.difficult}"')
+                self.game_field.move()
+                return
+        self._easy_move()
+
+    def _get_priority_cell(self, mark):
+        """Get priority cell, return True if get it otherwise False"""
+
+        # check for horizontal items in a row as two mark and empty one
+        for row in range(len(self.game_field.nested_list_field)):
+            if self.game_field.nested_list_field[row].count(mark) == 2 and self.game_field.nested_list_field[row].count(' ') == 1:
+                self.coordinates = [row, self.game_field.nested_list_field[row].index(' ')]
+                return True
+
+        # check for vertical items in a row as two mark and empty one
+        for col in range(len(self.game_field.nested_list_field[0])):
+            column = [self.game_field.nested_list_field[row][col] for row in range(len(self.game_field.nested_list_field))]
+            if column.count(mark) == 2 and column.count(' ') == 1:
+                self.coordinates = [column.index(' '), col]
+                return True
+
+        # check the elements in a row diagonally from the upper left corner
+        diag = [self.game_field.nested_list_field[i][i] for i in range(len(self.game_field.nested_list_field))]
+        if diag.count(mark) == 2 and diag.count(' ') == 1:
+            idx = diag.index(' ')
+            self.coordinates = [idx, idx]
+            return True
+
+        # check the elements in a row diagonally from the lower left corner
+        diag = [self.game_field.nested_list_field[i][len(
+            self.game_field.nested_list_field) - 1 - i] for i in range(len(self.game_field.nested_list_field))]
+        if diag.count(mark) == 2 and diag.count(' ') == 1:
+            idx = diag.index(' ')
+            self.coordinates = [idx, len(self.game_field.nested_list_field) - 1 - idx]
+            return True
+
+        return False
 
 
 class User(AbstractPlayer):
@@ -185,8 +241,8 @@ class User(AbstractPlayer):
 class GameFactory:
     """Creates setup game"""
     def __init__(self, player_1, player_2, game_field):
-        self.player_1 = User(game_field) if player_1 == 'user' else AI(game_field, player_1)
-        self.player_2 = User(game_field) if player_2 == 'user' else AI(game_field, player_2)
+        self.player_1 = User(game_field, mark='X') if player_1 == 'user' else AI(game_field, 'X', player_1)
+        self.player_2 = User(game_field, mark='O') if player_2 == 'user' else AI(game_field, 'O', player_2)
 
 
 class ParametersError(Exception):
@@ -195,13 +251,13 @@ class ParametersError(Exception):
 
 def parse_command():
     """Parse user commands for setup game"""
-    game_configuration = ('user', 'easy')
+    game_configuration = ('user', 'easy', 'medium')
     while True:
         command = input('Input command: ').split(' ')
         try:
             if len(command) == 1 and command[0] == 'exit':
                 return 'break'
-            elif command[0] == 'start':
+            elif len(command) == 3 and command[0] == 'start':
                 if command[1] in game_configuration and command[2] in game_configuration:
                     player_1 = command[1]
                     player_2 = command[2]
