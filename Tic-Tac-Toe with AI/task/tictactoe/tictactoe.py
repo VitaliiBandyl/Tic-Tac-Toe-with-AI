@@ -1,141 +1,72 @@
 import random
 from abc import ABC, abstractmethod
-from typing import List, Sequence
+from typing import List, Tuple
 
 
 class TicTacToeField:
-    def __init__(self, string_desk: str = '_________'):
-        self.string_field = string_desk
-        self.nested_list_field = self._convert_field_to_nested_list()
-        self._x = None
-        self._y = None
-        self.X = self.count_element('X')
-        self.O = self.count_element('O')
+    """Game field"""
 
-    def _convert_field_to_nested_list(self) -> List[List]:
-        """Replaces underscores to spaces and convert field to nested list"""
-        cleaned_field = self.string_field.replace('_', ' ')
-        nested_list = []
-        index = 0
-        for i in range(3):
-            list_ = []
-            for j in range(3):
-                list_.append(cleaned_field[index])
-                index += 1
-            nested_list.append(list_)
-        return nested_list
+    def __init__(self):
+        self.field = [[' ' for _ in range(3)] for _ in range(3)]
+        self.turn = 'X'
 
-    def show_game_field(self):
+    def print_game_field(self):
         """Prints game_field field to console"""
         print('---------')
-        for row in self.nested_list_field:
+        for row in self.field:
             print('|', end=' ')
             for element in row:
                 print(element, end=' ')
             print('|', end='\n')
         print('---------')
 
-    def validate_coordinates(self, coordinates: Sequence) -> str:
-        """Input validation. Returns validation result"""
-        try:
-            x = int(coordinates[0])
-            y = int(coordinates[1])
-        except (ValueError, IndexError):
-            return 'Not a Number'
+    def get_empty_cells(self) -> List[Tuple]:
+        """Finds all empty cells and returns it"""
+        empty_cells = []
+        for index_row, value_row in enumerate(self.field):
+            for index_cell, value_cell in enumerate(value_row):
+                if value_cell == ' ':
+                    empty_cells.append((index_row, index_cell))
+        return empty_cells
 
-        if not (1 <= x <= 3 and 1 <= y <= 3):
-            return 'Incorrect coordinates'
+    def move(self, coordinates: Tuple[int, int]):
+        """Makes a move"""
+        x = coordinates[0]
+        y = coordinates[1]
+        self.field[x][y] = self.turn
+        self.next_turn()
 
-        if self._is_empty_space(x, y):
-            return 'Valid'
-        return 'Cell is occupied'
+    def next_turn(self):
+        """Ends the current player’s turn and setups state for the next."""
+        self.turn = 'X' if self.turn == 'O' else 'O'
 
-    def _is_empty_space(self, x: int, y: int) -> bool:
-        """Checks if selected cell is empty"""
-        self._convert_coordinate(x, y)
-        if self.nested_list_field[self._x][self._y] == ' ':
-            return True
-        return False
-
-    def _convert_coordinate(self, x, y):
-        """Convert enumeration to default in python, from left top to right bottom"""
-        if x == 1 and y == 3:
-            self._x, self._y = 0, 0
-        elif x == 2 and y == 3:
-            self._x, self._y = 0, 1
-        elif x == 3 and y == 3:
-            self._x, self._y = 0, 2
-        elif x == 1 and y == 2:
-            self._x, self._y = 1, 0
-        elif x == 2 and y == 2:
-            self._x, self._y = 1, 1
-        elif x == 3 and y == 2:
-            self._x, self._y = 1, 2
-        elif x == 1 and y == 1:
-            self._x, self._y = 2, 0
-        elif x == 2 and y == 1:
-            self._x, self._y = 2, 1
-        elif x == 3 and y == 1:
-            self._x, self._y = 2, 2
-
-    def count_element(self, element: str) -> int:
-        """Counts 'X' or 'O' or ' ' elements on desk to check whose turn"""
-        count = 0
-        for row in self.nested_list_field:
-            for el in row:
-                if el == element:
-                    count += 1
-        return count
-
-    def move(self):
-        """Make move"""
-        if self.O < self.X:
-            self.nested_list_field[self._x][self._y] = 'O'
-            self.O = self.count_element('O')
-        else:
-            self.nested_list_field[self._x][self._y] = 'X'
-            self.X = self.count_element('X')
-
-    def check_winner(self):
+    def check_winner(self) -> str:
         """Check who wins"""
         if self._win_condition('O'):
             return 'O wins'
         elif self._win_condition('X'):
             return 'X wins'
-        elif not self.count_element(' '):
+        elif not self.get_empty_cells():
             return 'Draw'
 
     def _win_condition(self, elem: str):
         """Check wins conditions"""
-        win_conditions = any([
-            elem == self.nested_list_field[0][0] == self.nested_list_field[0][1] == self.nested_list_field[0][2],
-            elem == self.nested_list_field[1][0] == self.nested_list_field[1][1] == self.nested_list_field[1][2],
-            elem == self.nested_list_field[2][0] == self.nested_list_field[2][1] == self.nested_list_field[2][2],
-            elem == self.nested_list_field[0][0] == self.nested_list_field[1][0] == self.nested_list_field[2][0],
-            elem == self.nested_list_field[0][1] == self.nested_list_field[1][1] == self.nested_list_field[2][1],
-            elem == self.nested_list_field[0][2] == self.nested_list_field[1][2] == self.nested_list_field[2][2],
-            elem == self.nested_list_field[0][0] == self.nested_list_field[1][1] == self.nested_list_field[2][2],
-            elem == self.nested_list_field[0][2] == self.nested_list_field[1][1] == self.nested_list_field[2][0],
-        ])
+        triple = [elem, elem, elem]
 
-        if win_conditions:
-            return True
-        return False
+        row = self.field
+        column = [[c[j] for c in self.field] for j in range(3)]
+        diagonal = [row[i] for i, row in enumerate(self.field)]
+        back_diagonal = [row[2 - i] for i, row in enumerate(self.field)]
 
-    @property
-    def cursor_coordinates(self):
-        return self._x, self._y
-
-    @cursor_coordinates.setter
-    def cursor_coordinates(self, coordinates: List[int]):
-        self._x = coordinates[0]
-        self._y = coordinates[1]
+        return any((triple in row, triple in column, diagonal == triple, back_diagonal == triple))
 
 
 class AbstractPlayer(ABC):
     """Abstract player class for inheritance by other players"""
-    def __init__(self, game_field, mark):
+
+    def __init__(self, game_field: [TicTacToeField], mark: str):
         self.game_field = game_field
+        self.coordinates = None
         self.mark = mark
         self.opponent_mark = 'X' if self.mark == 'O' else 'O'
 
@@ -145,74 +76,76 @@ class AbstractPlayer(ABC):
 
 
 class AI(AbstractPlayer):
-    def __init__(self, game_field, mark, difficult):
+    """AI player"""
+
+    def __init__(self, game_field: [TicTacToeField], mark: str, difficult: str):
         super(AI, self).__init__(game_field, mark)
         self.difficult = difficult
-        self.coordinates = None
 
     def make_move(self):
-        """AI makes move"""
-        if not self.game_field.count_element(' '):
-            return
-
-        elif self.difficult == 'easy':
-            self._easy_move()
+        """AI makes a move"""
+        if self.difficult == 'easy':
+            self.easy_move()
 
         elif self.difficult == 'medium':
-            self._medium_move()
+            self.medium_move()
 
         elif self.difficult == 'hard':
             pass
 
-    def _easy_move(self):
-        """Make easy move. Random move"""
-        while True:
-            self.coordinates = (random.randint(1, 3), random.randint(1, 3))
-            validation_result = self.game_field.validate_coordinates(self.coordinates)
-            if validation_result == 'Valid':
-                print(f'Making move level "{self.difficult}"')
-                self.game_field.move()
-                return
+    def easy_move(self):
+        """Makes a move of easy difficulty. Random move"""
+        empty_cells = game_field.get_empty_cells()
+        self.coordinates = random.choice(empty_cells)
+        print(f'Making move level "{self.difficult}"')
+        self.game_field.move(self.coordinates)
 
-    def _medium_move(self):
-        """Make medium move"""
+    def medium_move(self):
+        """
+        Makes a move of medium difficulty.
+        If it can win in one move (if it has two in a row), it places a third to get three in a row and win.
+        If the opponent can win in one move, it plays the third itself to block the opponent to win.
+        Otherwise, it makes a easy (random) move.
+        """
         for mark in (self.mark, self.opponent_mark):
             if self._get_priority_cell(mark):
                 self.game_field.cursor_coordinates = self.coordinates
                 print(f'Making move level "{self.difficult}"')
-                self.game_field.move()
+                self.game_field.move(self.coordinates)
                 return
-        self._easy_move()
+        self.easy_move()
 
-    def _get_priority_cell(self, mark):
+    def _get_priority_cell(self, mark: str) -> bool:
         """Get priority cell, return True if get it otherwise False"""
 
         # check for horizontal items in a row as two mark and empty one
-        for row in range(len(self.game_field.nested_list_field)):
-            if self.game_field.nested_list_field[row].count(mark) == 2 and self.game_field.nested_list_field[row].count(' ') == 1:
-                self.coordinates = [row, self.game_field.nested_list_field[row].index(' ')]
+        for row in range(len(self.game_field.field)):
+            if self.game_field.field[row].count(mark) == 2 and self.game_field.field[row].count(
+                    ' ') == 1:
+                self.coordinates = [row, self.game_field.field[row].index(' ')]
                 return True
 
         # check for vertical items in a row as two mark and empty one
-        for col in range(len(self.game_field.nested_list_field[0])):
-            column = [self.game_field.nested_list_field[row][col] for row in range(len(self.game_field.nested_list_field))]
+        for col in range(len(self.game_field.field[0])):
+            column = [self.game_field.field[row][col] for row in
+                      range(len(self.game_field.field))]
             if column.count(mark) == 2 and column.count(' ') == 1:
                 self.coordinates = [column.index(' '), col]
                 return True
 
         # check the elements in a row diagonally from the upper left corner
-        diag = [self.game_field.nested_list_field[i][i] for i in range(len(self.game_field.nested_list_field))]
-        if diag.count(mark) == 2 and diag.count(' ') == 1:
-            idx = diag.index(' ')
+        diagonal = [self.game_field.field[i][i] for i in range(len(self.game_field.field))]
+        if diagonal.count(mark) == 2 and diagonal.count(' ') == 1:
+            idx = diagonal.index(' ')
             self.coordinates = [idx, idx]
             return True
 
         # check the elements in a row diagonally from the lower left corner
-        diag = [self.game_field.nested_list_field[i][len(
-            self.game_field.nested_list_field) - 1 - i] for i in range(len(self.game_field.nested_list_field))]
-        if diag.count(mark) == 2 and diag.count(' ') == 1:
-            idx = diag.index(' ')
-            self.coordinates = [idx, len(self.game_field.nested_list_field) - 1 - idx]
+        diagonal = [self.game_field.field[i][len(
+            self.game_field.field) - 1 - i] for i in range(len(self.game_field.field))]
+        if diagonal.count(mark) == 2 and diagonal.count(' ') == 1:
+            idx = diagonal.index(' ')
+            self.coordinates = [idx, len(self.game_field.field) - 1 - idx]
             return True
 
         return False
@@ -220,11 +153,17 @@ class AI(AbstractPlayer):
 
 class User(AbstractPlayer):
     """Real player"""
+    CONVERT_COORDINATES = {
+        ('1', '3'): (0, 0), ('2', '3'): (0, 1), ('3', '3'): (0, 2),
+        ('1', '2'): (1, 0), ('2', '2'): (1, 1), ('3', '2'): (1, 2),
+        ('1', '1'): (2, 0), ('2', '1'): (2, 1), ('3', '1'): (2, 2),
+    }
+
     def make_move(self):
-        """User makes move"""
+        """User makes a move"""
         while True:
-            coordinates = input('Enter the coordinates: ').split()
-            validation_result = self.game_field.validate_coordinates(coordinates)
+            self.coordinates = tuple(input('Enter the coordinates: ').split())
+            validation_result = self.validate_coordinates(self.coordinates)
             if validation_result == 'Not a Number':
                 print('You should enter numbers!')
                 continue
@@ -235,14 +174,37 @@ class User(AbstractPlayer):
                 print('This cell is occupied! Choose another one!')
                 continue
             else:
-                return self.game_field.move()
+                return self.game_field.move(self.coordinates)
+
+    def validate_coordinates(self, coordinates: Tuple) -> str:
+        """Input validation. Returns validation result"""
+        try:
+            x = int(coordinates[0])
+            y = int(coordinates[1])
+        except (ValueError, IndexError):
+            return 'Not a Number'
+
+        if not (1 <= x <= 3 and 1 <= y <= 3):
+            return 'Incorrect coordinates'
+
+        self.coordinates = self.CONVERT_COORDINATES.get(coordinates)
+        if self.coordinates not in self.game_field.get_empty_cells():
+            return 'Cell is occupied'
+        return 'Valid'
 
 
 class GameFactory:
     """Creates setup game"""
-    def __init__(self, player_1, player_2, game_field):
+
+    def __init__(self, player_1: [User, AI], player_2: [User, AI], game_field: [TicTacToeField]):
         self.player_1 = User(game_field, mark='X') if player_1 == 'user' else AI(game_field, 'X', player_1)
         self.player_2 = User(game_field, mark='O') if player_2 == 'user' else AI(game_field, 'O', player_2)
+        self.turn = self.player_1
+
+    def next_move(self):
+        """Makes a move and passes the move to another player."""
+        self.turn.make_move()
+        self.turn = self.player_1 if self.turn == self.player_2 else self.player_2
 
 
 class ParametersError(Exception):
@@ -279,17 +241,10 @@ if __name__ == '__main__':
 
         game_field = TicTacToeField()
         game = GameFactory(player_1, player_2, game_field)
-        game_field.show_game_field()
+        game_field.print_game_field()
         while True:
-            game.player_1.make_move()
-            game_field.show_game_field()
-            winner = game_field.check_winner()
-            if winner:
-                print(winner)
-                break
-
-            game.player_2.make_move()
-            game_field.show_game_field()
+            game.next_move()
+            game_field.print_game_field()
             winner = game_field.check_winner()
             if winner:
                 print(winner)
