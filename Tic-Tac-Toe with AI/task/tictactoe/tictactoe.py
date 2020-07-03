@@ -36,6 +36,13 @@ class TicTacToeField:
         self.field[x][y] = self.turn
         self.next_turn()
 
+    def undo(self, coordinates: Tuple[int, int]):
+        """Cancels the move"""
+        x = coordinates[0]
+        y = coordinates[1]
+        self.field[x][y] = ' '
+        self.next_turn()
+
     def next_turn(self):
         """Ends the current player’s turn and setups state for the next."""
         self.turn = 'X' if self.turn == 'O' else 'O'
@@ -43,13 +50,13 @@ class TicTacToeField:
     def check_winner(self) -> str:
         """Check who wins"""
         if self._win_condition('O'):
-            return 'O wins'
+            return 'O'
         elif self._win_condition('X'):
-            return 'X wins'
+            return 'X'
         elif not self.get_empty_cells():
             return 'Draw'
 
-    def _win_condition(self, elem: str):
+    def _win_condition(self, elem: str) -> bool:
         """Check wins conditions"""
         triple = [elem, elem, elem]
 
@@ -91,13 +98,13 @@ class AI(AbstractPlayer):
             self.medium_move()
 
         elif self.difficult == 'hard':
-            pass
+            self.hard_move()
+        print(f'Making move level "{self.difficult}"')
 
     def easy_move(self):
         """Makes a move of easy difficulty. Random move"""
         empty_cells = game_field.get_empty_cells()
         self.coordinates = random.choice(empty_cells)
-        print(f'Making move level "{self.difficult}"')
         self.game_field.move(self.coordinates)
 
     def medium_move(self):
@@ -109,11 +116,24 @@ class AI(AbstractPlayer):
         """
         for mark in (self.mark, self.opponent_mark):
             if self._get_priority_cell(mark):
-                self.game_field.cursor_coordinates = self.coordinates
-                print(f'Making move level "{self.difficult}"')
                 self.game_field.move(self.coordinates)
                 return
         self.easy_move()
+
+    def hard_move(self):
+        """Finds the best move based on MiniMax Algorithm in Game Theory"""
+        best_score = -2
+        best_move = None
+        for move in self.game_field.get_empty_cells():
+            if len(self.game_field.get_empty_cells()) == 9:
+                return self.easy_move()
+            self.game_field.move(move)
+            score = self.mini_max(False)
+            self.game_field.undo(move)
+            if score > best_score:
+                best_score = score
+                best_move = move
+        self.game_field.move(best_move)
 
     def _get_priority_cell(self, mark: str) -> bool:
         """Get priority cell, return True if get it otherwise False"""
@@ -149,6 +169,25 @@ class AI(AbstractPlayer):
             return True
 
         return False
+
+    def mini_max(self, is_max_turn: bool) -> int:
+        """MiniMax Algorithm in Game Theory"""
+        result = game_field.check_winner()
+
+        if result == self.mark:
+            return 1
+        elif result == self.opponent_mark:
+            return -1
+        elif result == 'Draw':
+            return 0
+
+        scores = []
+        for move in self.game_field.get_empty_cells():
+            self.game_field.move(move)
+            scores.append(self.mini_max(not is_max_turn))
+            self.game_field.undo(move)
+
+        return max(scores) if is_max_turn else min(scores)
 
 
 class User(AbstractPlayer):
@@ -213,7 +252,7 @@ class ParametersError(Exception):
 
 def parse_command():
     """Parse user commands for setup game"""
-    game_configuration = ('user', 'easy', 'medium')
+    game_configuration = ('user', 'easy', 'medium', 'hard')
     while True:
         command = input('Input command: ').split(' ')
         try:
@@ -247,5 +286,5 @@ if __name__ == '__main__':
             game_field.print_game_field()
             winner = game_field.check_winner()
             if winner:
-                print(winner)
+                print(winner if winner == 'Draw' else f'{winner} wins!')
                 break
